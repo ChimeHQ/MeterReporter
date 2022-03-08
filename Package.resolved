@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Meter",
+        "repositoryURL": "https://github.com/ChimeHQ/Meter",
+        "state": {
+          "branch": "main",
+          "revision": "742d4c44b7fc2c38dfc764f9c90fba1f031fe876",
+          "version": null
+        }
+      },
+      {
+        "package": "Wells",
+        "repositoryURL": "https://github.com/ChimeHQ/Wells",
+        "state": {
+          "branch": "main",
+          "revision": "13c0ba4baa72b2607531426f1d772d0ba121416c",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
