@@ -2,7 +2,7 @@
 import Cocoa
 import Meter
 
-public class ExceptionLoggingApplication: NSApplication {
+open class ExceptionLoggingApplication: NSApplication {
     public var exceptionInfoURL: URL?
 
     public override func reportException(_ exception: NSException) {
