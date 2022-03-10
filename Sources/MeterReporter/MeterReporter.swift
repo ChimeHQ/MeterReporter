@@ -2,6 +2,9 @@ import Foundation
 import Wells
 import Meter
 import os.log
+#if os(macOS)
+import AppKit
+#endif
 
 extension UUID {
     var lowerAlphaOnly: String {
@@ -22,7 +25,8 @@ public class MeterReporter: NSObject {
         self.wellsReporter = WellsReporter(baseURL: configuration.reportsURL,
                                            backgroundIdentifier: configuration.backgroundIdentifier)
 
-        wellsReporter.locationProvider = FilenameIdentifierLocationProvider(baseURL: configuration.reportsURL)
+        wellsReporter.locationProvider = IdentifierExtensionLocationProvider(baseURL: configuration.reportsURL,
+                                                                             fileExtension: "mxdiagnostic")
     }
 
     public convenience init(endpointURL: URL) {
@@ -33,6 +37,8 @@ public class MeterReporter: NSObject {
         os_log("starting", log: log, type: .debug)
 
         ensureReportingDirectoryExists()
+
+        configureExceptionLogging()
 
         subscriber.onReceive = { [weak self] in self?.receivedPayloads($0) }
         subscriber.start()
@@ -101,6 +107,14 @@ extension MeterReporter {
 }
 
 extension MeterReporter {
+    private func configureExceptionLogging() {
+        #if os(macOS)
+        if let app = NSApp as? ExceptionLoggingApplication {
+            app.exceptionInfoURL = exceptionInfoURL
+        }
+        #endif
+    }
+    
     private var exceptionInfoURL: URL {
         return reportDirectoryURL.appendingPathComponent("exception_info.json")
     }
