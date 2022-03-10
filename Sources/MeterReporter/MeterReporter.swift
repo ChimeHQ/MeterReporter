@@ -32,6 +32,8 @@ public class MeterReporter: NSObject {
     public func start() {
         os_log("starting", log: log, type: .debug)
 
+        ensureReportingDirectoryExists()
+
         subscriber.onReceive = { [weak self] in self?.receivedPayloads($0) }
         subscriber.start()
 
@@ -198,6 +200,20 @@ extension MeterReporter {
 
         for url in oldUrls {
             removeItem(at: url)
+        }
+    }
+
+    func ensureReportingDirectoryExists() {
+        let url = reportDirectoryURL
+
+        if FileManager.default.fileExists(atPath: url.path) {
+            return
+        }
+
+        do {
+            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            os_log("failed to create reporting directory %{public}@ %{public}@", log: log, type: .error, url.path, String(describing: error))
         }
     }
 }
