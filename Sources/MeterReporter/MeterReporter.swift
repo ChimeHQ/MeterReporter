@@ -171,7 +171,7 @@ extension MeterReporter {
             return
         }
 
-        let oldDate = Date().addingTimeInterval(-30.0 * 24.0 * 60.0 * 60.0)
+        let oldDate = Date().addingTimeInterval(-10.0 * 24.0 * 60.0 * 60.0)
 
         let oldUrls = urls.filter { url in
             let values = try? url.resourceValues(forKeys: [.creationDateKey])
