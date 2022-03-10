@@ -1,6 +1,5 @@
 import Foundation
 import Wells
-import MetricKit
 import Meter
 import os.log
 
@@ -13,10 +12,12 @@ extension UUID {
 public class MeterReporter: NSObject {
     private let wellsReporter: WellsReporter
     public var configuration: Configuration
+    private let subscriber: DiagnosticSubscriber
     private let log: OSLog
 
     public init(configuration: Configuration) {
         self.configuration = configuration
+        self.subscriber = DiagnosticSubscriber()
         self.log = OSLog(subsystem: "com.chimehq.MeterReporter", category: "MeterReporter")
         self.wellsReporter = WellsReporter(baseURL: configuration.reportsURL,
                                            backgroundIdentifier: configuration.backgroundIdentifier)
@@ -31,9 +32,8 @@ public class MeterReporter: NSObject {
     public func start() {
         os_log("starting", log: log, type: .debug)
 
-        if #available(macOS 12.0, *) {
-            MXMetricManager.shared.add(self)
-        }
+        subscriber.onReceive = { [weak self] in self?.receivedPayloads($0) }
+        subscriber.start()
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 60.0) {
             self.removeItem(at: self.exceptionInfoURL)
@@ -55,6 +55,7 @@ extension MeterReporter {
         public var backgroundIdentifier: String? = WellsUploader.defaultBackgroundIdentifier
         public var reportsURL: URL = WellsReporter.defaultDirectory
         public var log: OSLog = OSLog(subsystem: "com.chimehq.MeterReporter", category: "MeterReporter")
+        public var filterSimulatedPayloads = true
 
         public init(endpointURL: URL) {
             self.endpointURL = endpointURL
@@ -62,25 +63,29 @@ extension MeterReporter {
     }
 }
 
-@available(macOS 12.0, *)
-extension MeterReporter: MXMetricManagerSubscriber {
-    public func didReceive(_ payloads: [MXDiagnosticPayload]) {
-        os_log("received MetricKit payloads %{public}d", log: log, type: .info, payloads.count)
+extension MeterReporter {
+    func receivedPayloads(_ payloads: [Data]) {
+        os_log("received payloads %{public}d", log: log, type: .info, payloads.count)
 
         let symbolicator = DlfcnSymbolicator()
         let exceptionInfo = existingExceptionInfo()
 
         removeItem(at: exceptionInfoURL)
 
-        for mxPayload in payloads {
+        for rawData in payloads {
             let data: Data
 
             do {
-                let payload = try DiagnosticPayload.from(payload: mxPayload)
+                let payload = try DiagnosticPayload.from(data: rawData)
+
+                if payload.isSimulated && configuration.filterSimulatedPayloads {
+                    os_log("skipping simulated payload", log: log, type: .error)
+                    continue
+                }
 
                 data = processPayload(payload, with: symbolicator, exceptionInfo: exceptionInfo)
             } catch {
-                data = mxPayload.jsonRepresentation()
+                data = rawData
                 os_log("failed to decode payload %{public}@", log: log, type: .error, String(describing: error))
             }
 
