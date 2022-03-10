@@ -36,7 +36,7 @@ public class MeterReporter: NSObject {
         subscriber.start()
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 60.0) {
-            self.removeItem(at: self.exceptionInfoURL)
+            self.removeExistingExceptionInfo()
 
             self.cleanUpExistingLogs()
         }
@@ -70,7 +70,7 @@ extension MeterReporter {
         let symbolicator = DlfcnSymbolicator()
         let exceptionInfo = existingExceptionInfo()
 
-        removeItem(at: exceptionInfoURL)
+        removeExistingExceptionInfo()
 
         for rawData in payloads {
             let data: Data
@@ -123,6 +123,16 @@ extension MeterReporter {
         return info
     }
 
+    private func removeExistingExceptionInfo() {
+        let url = exceptionInfoURL
+
+        if FileManager.default.fileExists(atPath: url.path) == false {
+            return
+        }
+
+        removeItem(at: url)
+    }
+
     func processPayload(_ payload: DiagnosticPayload, with symbolicator: Symbolicator, exceptionInfo: ExceptionInfo?) -> Data {
         let symPayload = symbolicator.symbolicate(payload: payload)
         let lastCrash = symPayload.crashDiagnostics?.last
@@ -159,7 +169,7 @@ extension MeterReporter {
         do {
             try FileManager.default.removeItem(at: url)
         } catch {
-            os_log("failed to remove log at %{public}@ %{public}@", log: log, type: .error, url.path, String(describing: error))
+            os_log("failed to remove item at %{public}@ %{public}@", log: log, type: .error, url.path, String(describing: error))
         }
     }
 
