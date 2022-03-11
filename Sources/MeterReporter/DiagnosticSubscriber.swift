@@ -11,7 +11,7 @@ class DiagnosticSubscriber: NSObject {
     }
 
     static var metricKitAvailable: Bool {
-        #if canImport(MetricKit) && compiler(>=5.5.1)
+        #if (os(iOS) || os(macOS)) && compiler(>=5.5.1)
         if #available(iOS 14.0, macOS 12.0, *) {
             return true
         }
@@ -21,7 +21,7 @@ class DiagnosticSubscriber: NSObject {
     }
 
     func start() {
-        #if canImport(MetricKit) && compiler(>=5.5.1)
+        #if (os(iOS) || os(macOS)) && compiler(>=5.5.1)
         if #available(iOS 14.0, macOS 12.0, *) {
             MXMetricManager.shared.add(self)
         }
@@ -29,16 +29,9 @@ class DiagnosticSubscriber: NSObject {
     }
 }
 
-#if canImport(MetricKit) && compiler(>=5.5.1)
-@available(iOS 13.0, macOS 12.0, *)
+#if (os(iOS) || os(macOS)) && compiler(>=5.5.1)
+@available(iOS 14.0, macOS 12.0, *)
 extension DiagnosticSubscriber: MXMetricManagerSubscriber {
-    #if os(iOS)
-    @available(iOS 13.0, *)
-    func didReceive(_ payloads: [MXMetricPayload]) {
-    }
-    #endif
-
-    @available(iOS 14.0, macOS 12.0, *)
     func didReceive(_ payloads: [MXDiagnosticPayload]) {
         guard payloads.isEmpty == false else { return }
 
