@@ -5,18 +5,18 @@
         "package": "Meter",
         "repositoryURL": "https://github.com/ChimeHQ/Meter",
         "state": {
-          "branch": "main",
-          "revision": "1b6a0a53e462a5b6839ad04b51f26d353e6be70a",
-          "version": null
+          "branch": null,
+          "revision": "3080bca08f99dbd9bd027caec15deb8b4b69d99a",
+          "version": "0.4.0"
         }
       },
       {
         "package": "Wells",
         "repositoryURL": "https://github.com/ChimeHQ/Wells",
         "state": {
-          "branch": "main",
-          "revision": "40e64f6c7b1bd93200c54b877b4dee7ac90180ff",
-          "version": null
+          "branch": null,
+          "revision": "56d9682a573389f27fbf2e873d04a8aac6d3814c",
+          "version": "0.2.0"
         }
       }
     ]
