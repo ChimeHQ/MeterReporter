@@ -3,7 +3,7 @@
 # MeterReporter
 Lightweight MetricKit-based diagnostics reporting.
 
-MeterReporter will capture MetricKit payloads. It will then use [Meter](https://github.com/ChimeHQ/Meter) to process and symbolicate them. The resulting data is very close to the MetricKit JSON structure. But, it does add some fields to support the additional features.
+MeterReporter will capture MetricKit payloads and relay them to a backend. It uses [Meter](https://github.com/ChimeHQ/Meter) to process and symbolicate payloads. The resulting data is very close to the MetricKit JSON structure. But, it does add some fields to support the additional features.
 
 ## Integration
 ```swift
@@ -32,7 +32,7 @@ By default, MeterReporter uses `URLSession` background uploads for both reliabil
 
 ## NSException Capture
 
-MeterReporter can capture uncaught NSExceptions on macOS. Unfortunately, AppKit interfers with the flow of runtime exceptions. If you want to capture information about uncaught exceptions, some extra work is required.
+MeterReporter can capture uncaught NSExceptions on macOS. Unfortunately, AppKit interfers with the flow of runtime exceptions. If you want to get this information about uncaught exceptions, some extra work is required.
 
 The top-level `NSApplication` instance for your app must be a subclass of `ExceptionLoggingApplication`.
 
@@ -51,12 +51,12 @@ I would also strongly recommend setting the `NSApplicationCrashOnExceptions` def
 
 ## Submission Request
 
-The request made to the endpoint will be an HTTP `PUT`.
+The request made to the endpoint will be an HTTP `PUT`. The request will also set some headers.
 
 - `Content-Type` will be `application/vnd.chimehq-mxdiagnostic`
-- `MeterReporter-Report-Id` as the supplied report id
+- `MeterReporter-Report-Id` will be a unique identifier
 - `MeterReporter-Platform`
-- `MeterReporter-Host-Id` if configuration.hostIdentifier is non-nil
+- `MeterReporter-Host-Id` if `configuration.hostIdentifier` is non-nil
 
 ## Suggestions or Feedback
 We'd love to hear from you! Get in touch via [twitter](https://twitter.com/ChimeHQ), an issue, or a pull request.
