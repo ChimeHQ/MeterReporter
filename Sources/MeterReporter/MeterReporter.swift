@@ -12,7 +12,7 @@ extension UUID {
     }
 }
 
-public class MeterReporter: NSObject {
+public class MeterReporter {
     private let wellsReporter: WellsReporter
     public var configuration: Configuration
     private let subscriber: DiagnosticSubscriber
@@ -27,6 +27,8 @@ public class MeterReporter: NSObject {
 
         wellsReporter.locationProvider = IdentifierExtensionLocationProvider(baseURL: configuration.reportsURL,
                                                                              fileExtension: "mxdiagnostic")
+
+        wellsReporter.existingLogHandler = { [unowned self] in self.handleExistingLog(at: $0, date: $1) }
     }
 
     public convenience init(endpointURL: URL) {
@@ -36,22 +38,21 @@ public class MeterReporter: NSObject {
     public func start() {
         os_log("starting", log: log, type: .debug)
 
-        ensureReportingDirectoryExists()
+        do {
+            try wellsReporter.createReportDirectoryIfNeeded()
+        } catch {
+            os_log("failed to create reporting directory %{public}@", log: log, type: .error, String(describing: error))
+            return
+        }
 
         configureExceptionLogging()
 
         subscriber.onReceive = { [weak self] in self?.receivedPayloads($0) }
         subscriber.start()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 60.0) {
-            self.removeExistingExceptionInfo()
-
-            self.cleanUpExistingLogs()
-        }
     }
 
     private var reportDirectoryURL: URL {
-        return configuration.reportsURL
+        return wellsReporter.baseURL
     }
 }
 
@@ -168,17 +169,17 @@ extension MeterReporter {
 
         try data.write(to: url)
 
-        try submit(url, identifier: id)
+        submit(url, identifier: id)
     }
 
-    func submit(_ url: URL, identifier: String? = nil) throws {
+    func submit(_ url: URL, identifier: String? = nil) {
         let id = identifier ?? url.deletingPathExtension().lastPathComponent
 
         os_log("submitting %{public}@", log: log, type: .info, url.path)
 
         let request = makeURLRequest(for: id)
 
-        try wellsReporter.submit(fileURL: url, identifier: id, uploadRequest: request)
+        wellsReporter.submit(fileURL: url, identifier: id, uploadRequest: request)
     }
 
     func removeItem(at url: URL) {
@@ -189,46 +190,25 @@ extension MeterReporter {
         }
     }
 
-    func cleanUpExistingLogs() {
-        let urls = try? FileManager.default.contentsOfDirectory(at: reportDirectoryURL,
-                                                                includingPropertiesForKeys: [.creationDateKey])
-
-        guard let urls = urls else {
+    func handleExistingLog(at url: URL, date: Date) {
+        if url == exceptionInfoURL {
+            os_log("removing existing exception_info.json", log: log, type: .info)
+            removeItem(at: url)
             return
         }
 
+        // ~ 7 days
         let oldDate = Date().addingTimeInterval(-7.0 * 24.0 * 60.0 * 60.0)
 
-        let oldUrls = urls.filter { url in
-            let values = try? url.resourceValues(forKeys: [.creationDateKey])
-            let date = values?.creationDate ?? Date.distantPast
-
-            return oldDate >= date
-        }
-
-        guard oldUrls.isEmpty == false else {
-            return
-        }
-
-        os_log("cleaning old logs", log: log, type: .info)
-
-        for url in oldUrls {
+        if date < oldDate {
+            os_log("removing old log %{public}@", log: log, type: .info, url.path)
             removeItem(at: url)
-        }
-    }
-
-    func ensureReportingDirectoryExists() {
-        let url = reportDirectoryURL
-
-        if FileManager.default.fileExists(atPath: url.path) {
             return
         }
 
-        do {
-            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
-        } catch {
-            os_log("failed to create reporting directory %{public}@ %{public}@", log: log, type: .error, url.path, String(describing: error))
-        }
+        os_log("resubmitting %{public}@", log: log, type: .info, url.path)
+
+        submit(url)
     }
 }
 
