@@ -114,6 +114,8 @@ extension MeterReporter {
             app.exceptionInfoURL = exceptionInfoURL
         }
         #endif
+
+        UncaughtExceptionLogger.logger.exceptionInfoURL = exceptionInfoURL
     }
     
     private var exceptionInfoURL: URL {
