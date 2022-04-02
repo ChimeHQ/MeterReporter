@@ -16,19 +16,25 @@ public class MeterReporter {
     private let wellsReporter: WellsReporter
     public var configuration: Configuration
     private let subscriber: DiagnosticSubscriber
-    private let log: OSLog
+    private var log: OSLog { Self.log }
+    private static let log = OSLog(subsystem: "com.chimehq.MeterReporter", category: "MeterReporter")
 
     public init(configuration: Configuration) {
         self.configuration = configuration
         self.subscriber = DiagnosticSubscriber()
-        self.log = OSLog(subsystem: "com.chimehq.MeterReporter", category: "MeterReporter")
         self.wellsReporter = WellsReporter(baseURL: configuration.reportsURL,
                                            backgroundIdentifier: configuration.backgroundIdentifier)
 
         wellsReporter.locationProvider = IdentifierExtensionLocationProvider(baseURL: configuration.reportsURL,
                                                                              fileExtension: "mxdiagnostic")
 
-        wellsReporter.existingLogHandler = { [unowned self] in self.handleExistingLog(at: $0, date: $1) }
+        wellsReporter.existingLogHandler = { [weak self] in
+            guard let self = self else {
+                os_log("deallocated – cannot process log %{public}@", log: Self.log, type: .error, $0.path)
+                return
+            }
+            self.handleExistingLog(at: $0, date: $1)
+        }
     }
 
     public convenience init(endpointURL: URL) {
