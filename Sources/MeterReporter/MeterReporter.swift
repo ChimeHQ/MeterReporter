@@ -28,7 +28,7 @@ public class MeterReporter {
         wellsReporter.locationProvider = IdentifierExtensionLocationProvider(baseURL: configuration.reportsURL,
                                                                              fileExtension: "mxdiagnostic")
 
-        wellsReporter.existingLogHandler = { [unowned self] in self.handleExistingLog(at: $0, date: $1) }
+        wellsReporter.existingLogHandler = { [weak self] in self?.handleExistingLog(at: $0, date: $1) }
     }
 
     public convenience init(endpointURL: URL) {
