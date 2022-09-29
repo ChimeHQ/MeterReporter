@@ -13,6 +13,10 @@ extension UUID {
 }
 
 /// Collect and relay MetricKit payloads.
+///
+/// This class will accept MetricKit data and relay it to a remote endpoint, per its configuration.
+///
+/// - Important: You must hold a reference to an instance of this class to keep it active.
 public class MeterReporter {
     private let wellsReporter: WellsReporter
     public var configuration: Configuration
