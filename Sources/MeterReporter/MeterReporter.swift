@@ -12,6 +12,7 @@ extension UUID {
     }
 }
 
+/// Collect and relay MetricKit payloads.
 public class MeterReporter {
     private let wellsReporter: WellsReporter
     public var configuration: Configuration
