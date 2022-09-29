@@ -66,6 +66,9 @@ extension MeterReporter {
         public var endpointURL: URL
         public var hostIdentifier: String?
 
+		/// The NSURLSession background indentifier
+		///
+		/// This has a default value, but can be customized if needed. Setting the value to `nil` will disable background uploading.
         public var backgroundIdentifier: String? = WellsUploader.defaultBackgroundIdentifier
         public var reportsURL: URL = WellsReporter.defaultDirectory
         public var log: OSLog = OSLog(subsystem: "com.chimehq.MeterReporter", category: "MeterReporter")
