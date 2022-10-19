@@ -59,6 +59,8 @@ The request made to the endpoint will be an HTTP `PUT`. The request will also se
 - `MeterReporter-Platform`
 - `MeterReporter-Host-Id` if `configuration.hostIdentifier` is non-nil
 
+The data itself is the result of Meter's `DiagnosticPayload.jsonRepresentation()`.
+
 ## Suggestions or Feedback
 We'd love to hear from you! Get in touch via [twitter](https://twitter.com/ChimeHQ), an issue, or a pull request.
 
