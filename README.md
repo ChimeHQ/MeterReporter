@@ -62,7 +62,7 @@ The request made to the endpoint will be an HTTP `PUT`. The request will also se
 The data itself is the result of Meter's `DiagnosticPayload.jsonRepresentation()`.
 
 ## Suggestions or Feedback
-We'd love to hear from you! Get in touch via [twitter](https://twitter.com/ChimeHQ), an issue, or a pull request.
+We'd love to hear from you! Get in touch via an issue or pull request.
 
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
 
