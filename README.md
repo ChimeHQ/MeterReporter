@@ -1,6 +1,5 @@
 <div align="center">
 
-[![License][license badge]][license]
 [![Platforms][platforms badge]][platforms]
 [![Matrix][matrix badge]][matrix]
 
@@ -79,4 +78,4 @@ By participating in this project you agree to abide by the [Contributor Code of 
 [platforms]: https://swiftpackageindex.com/ChimeHQ/MeterReporter
 [platforms badge]: https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FChimeHQ%2FMeterReporter%2Fbadge%3Ftype%3Dplatforms
 [matrix]: https://matrix.to/#/%23chimehq%3Amatrix.org
-[matrix badge]: https://img.shields.io/badge/matrix/chimehq:matrix.org.svg
+[matrix badge]: https://img.shields.io/matrix/chimehq%3Amatrix.org?label=Matrix
