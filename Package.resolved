@@ -1,25 +1,30 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "Meter",
-        "repositoryURL": "https://github.com/ChimeHQ/Meter",
-        "state": {
-          "branch": null,
-          "revision": "3080bca08f99dbd9bd027caec15deb8b4b69d99a",
-          "version": "0.4.0"
-        }
-      },
-      {
-        "package": "Wells",
-        "repositoryURL": "https://github.com/ChimeHQ/Wells",
-        "state": {
-          "branch": null,
-          "revision": "1558d1bbafc1c57060103c5194ffa3abf4a332e3",
-          "version": "0.3.0"
-        }
+  "pins" : [
+    {
+      "identity" : "background",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ChimeHQ/Background",
+      "state" : {
+        "revision" : "11f1bc95a7ec88c275b522b12883ada9dbc062e6"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "meter",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ChimeHQ/Meter",
+      "state" : {
+        "revision" : "3080bca08f99dbd9bd027caec15deb8b4b69d99a",
+        "version" : "0.4.0"
+      }
+    },
+    {
+      "identity" : "wells",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ChimeHQ/Wells",
+      "state" : {
+        "revision" : "c31f833829083c5966adeff16832879acdcad214"
+      }
+    }
+  ],
+  "version" : 2
 }

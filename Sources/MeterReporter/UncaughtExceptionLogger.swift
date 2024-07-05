@@ -1,11 +1,11 @@
 import Foundation
 import Meter
 
-class UncaughtExceptionLogger {
+final class UncaughtExceptionLogger {
     public var exceptionInfoURL: URL?
     fileprivate let existingHandler: NSUncaughtExceptionHandler?
 
-    static let logger = UncaughtExceptionLogger()
+	nonisolated(unsafe) static let logger = UncaughtExceptionLogger()
 
     private init() {
         self.existingHandler = NSGetUncaughtExceptionHandler()

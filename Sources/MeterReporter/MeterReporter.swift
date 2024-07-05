@@ -1,7 +1,7 @@
 import Foundation
 import Wells
 import Meter
-import os.log
+@preconcurrency import os.log
 #if os(macOS)
 import AppKit
 #endif
@@ -17,9 +17,9 @@ extension UUID {
 /// This class will accept MetricKit data and relay it to a remote endpoint, per its configuration.
 ///
 /// - Important: You must hold a reference to an instance of this class to keep it active.
-public class MeterReporter {
+public actor MeterReporter {
     private let wellsReporter: WellsReporter
-    public var configuration: Configuration
+    public let configuration: Configuration
     private let subscriber: DiagnosticSubscriber
     private let log: OSLog
 
@@ -30,46 +30,61 @@ public class MeterReporter {
         self.wellsReporter = WellsReporter(baseURL: configuration.reportsURL,
                                            backgroundIdentifier: configuration.backgroundIdentifier)
 
-        wellsReporter.locationProvider = IdentifierExtensionLocationProvider(baseURL: configuration.reportsURL,
-                                                                             fileExtension: "mxdiagnostic")
+		let baseURL = configuration.reportsURL
 
-        wellsReporter.existingLogHandler = { [weak self] in self?.handleExistingLog(at: $0, date: $1) }
+		Task { [wellsReporter] in
+			await wellsReporter.setLocationProvider {
+				baseURL.appendingPathComponent($0).appendingPathExtension("mxdiagnostic")
+			}
+
+			await wellsReporter.setExistingLogHandler {logUrl, date in
+				Task { [weak self] in
+					await self?.handleExistingLog(at: logUrl, date: date)
+				}
+			}
+		}
     }
 
-    public convenience init(endpointURL: URL) {
+    public init(endpointURL: URL) {
         self.init(configuration: Configuration(endpointURL: endpointURL))
     }
 
     public func start() {
         os_log("starting", log: log, type: .debug)
 
-        do {
-            try wellsReporter.createReportDirectoryIfNeeded()
-        } catch {
-            os_log("failed to create reporting directory %{public}@", log: log, type: .error, String(describing: error))
-            return
-        }
+		Task { [log, wellsReporter] in
+			do {
+				try await wellsReporter.createReportDirectoryIfNeeded()
+			} catch {
+				os_log("failed to create reporting directory %{public}@", log: log, type: .error, String(describing: error))
+				return
+			}
 
-        configureExceptionLogging()
+			await configureExceptionLogging()
 
-        subscriber.onReceive = { [weak self] in self?.receivedPayloads($0) }
-        subscriber.start()
+			subscriber.onReceive = { payloads in
+				Task { [weak self] in
+					await self?.receivedPayloads(payloads)
+				}
+			}
+			subscriber.start()
+		}
     }
 
-    private var reportDirectoryURL: URL {
+    private nonisolated var reportDirectoryURL: URL {
         return wellsReporter.baseURL
     }
 }
 
 extension MeterReporter {
-    public struct Configuration {
+	public struct Configuration: Sendable {
         public var endpointURL: URL
         public var hostIdentifier: String?
 
 		/// The NSURLSession background indentifier
 		///
 		/// This has a default value, but can be customized if needed. Setting the value to `nil` will disable background uploading.
-        public var backgroundIdentifier: String? = WellsUploader.defaultBackgroundIdentifier
+		public var backgroundIdentifier: String? = WellsReporter.defaultBackgroundIdentifier
         public var reportsURL: URL = WellsReporter.defaultDirectory
         public var log: OSLog = OSLog(subsystem: "com.chimehq.MeterReporter", category: "MeterReporter")
         public var filterSimulatedPayloads = true
@@ -116,6 +131,7 @@ extension MeterReporter {
 }
 
 extension MeterReporter {
+	@MainActor
     private func configureExceptionLogging() {
         #if os(macOS)
         if let app = NSApp as? ExceptionLoggingApplication {
@@ -126,7 +142,7 @@ extension MeterReporter {
         UncaughtExceptionLogger.logger.exceptionInfoURL = exceptionInfoURL
     }
     
-    private var exceptionInfoURL: URL {
+    private nonisolated var exceptionInfoURL: URL {
         return reportDirectoryURL.appendingPathComponent("exception_info.json")
     }
 
@@ -189,7 +205,9 @@ extension MeterReporter {
 
         let request = makeURLRequest(for: id)
 
-        wellsReporter.submit(fileURL: url, identifier: id, uploadRequest: request)
+		Task { [wellsReporter] in
+			await wellsReporter.submit(fileURL: url, identifier: id, uploadRequest: request)
+		}
     }
 
     func removeItem(at url: URL) {

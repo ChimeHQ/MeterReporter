@@ -1,5 +1,10 @@
+<div align="center">
+
 [![License][license badge]][license]
 [![Platforms][platforms badge]][platforms]
+[![Matrix][matrix badge]][matrix]
+
+</div>
 
 # MeterReporter
 Lightweight MetricKit-based diagnostics reporting.
@@ -62,11 +67,16 @@ The request made to the endpoint will be an HTTP `PUT`. The request will also se
 The data itself is the result of Meter's `DiagnosticPayload.jsonRepresentation()`.
 
 ## Suggestions or Feedback
-We'd love to hear from you! Get in touch via an issue or pull request.
 
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+I would love to hear from you! Issues or pull requests work great. A [Matrix space][matrix] is also available for live help, but I have a strong bias towards answering in the form of documentation.
 
-[license]: https://opensource.org/licenses/BSD-3-Clause
-[license badge]: https://img.shields.io/github/license/ChimeHQ/MeterReporter
+I prefer collaboration, and would love to find ways to work together if you have a similar project.
+
+I prefer indentation with tabs for improved accessibility. But, I'd rather you use the system you want and make a PR than hesitate because of whitespace.
+
+By participating in this project you agree to abide by the [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
+
 [platforms]: https://swiftpackageindex.com/ChimeHQ/MeterReporter
 [platforms badge]: https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FChimeHQ%2FMeterReporter%2Fbadge%3Ftype%3Dplatforms
+[matrix]: https://matrix.to/#/%23chimehq%3Amatrix.org
+[matrix badge]: https://img.shields.io/badge/matrix/chimehq:matrix.org.svg
